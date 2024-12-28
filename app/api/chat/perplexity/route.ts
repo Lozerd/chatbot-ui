@@ -2,6 +2,9 @@ import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
 import { OpenAIStream, StreamingTextResponse } from "ai"
 import OpenAI from "openai"
+import { SocksProxyAgent } from "socks-proxy-agent"
+const proxyUrl = process.env.OPENAI_API_PROXY || "" // Replace with your SOCKS5 proxy's address and port
+const agent = new SocksProxyAgent(proxyUrl)
 
 export const runtime = "edge"
 
@@ -20,7 +23,8 @@ export async function POST(request: Request) {
     // Perplexity is compatible the OpenAI SDK
     const perplexity = new OpenAI({
       apiKey: profile.perplexity_api_key || "",
-      baseURL: "https://api.perplexity.ai/"
+      baseURL: "https://api.perplexity.ai/",
+      httpAgent: agent
     })
 
     const response = await perplexity.chat.completions.create({

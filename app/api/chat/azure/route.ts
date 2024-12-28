@@ -3,6 +3,10 @@ import { ChatAPIPayload } from "@/types"
 import { OpenAIStream, StreamingTextResponse } from "ai"
 import OpenAI from "openai"
 import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs"
+import { SocksProxyAgent } from "socks-proxy-agent"
+const proxyUrl = 
+  process.env.OPENAI_API_PROXY || "" // Replace with your SOCKS5 proxy's address and port
+const agent = new SocksProxyAgent(proxyUrl)
 
 export const runtime = "edge"
 
@@ -48,7 +52,8 @@ export async function POST(request: Request) {
       apiKey: KEY,
       baseURL: `${ENDPOINT}/openai/deployments/${DEPLOYMENT_ID}`,
       defaultQuery: { "api-version": "2023-12-01-preview" },
-      defaultHeaders: { "api-key": KEY }
+      defaultHeaders: { "api-key": KEY },
+      httpAgent: agent
     })
 
     const response = await azureOpenai.chat.completions.create({

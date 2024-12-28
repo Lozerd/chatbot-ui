@@ -4,6 +4,9 @@ import { OpenAIStream, StreamingTextResponse } from "ai"
 import { ServerRuntime } from "next"
 import OpenAI from "openai"
 import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs"
+import { SocksProxyAgent } from "socks-proxy-agent"
+const proxyUrl = process.env.OPENAI_API_PROXY || "" // Replace with your SOCKS5 proxy's address and port
+const agent = new SocksProxyAgent(proxyUrl)
 
 export const runtime: ServerRuntime = "edge"
 
@@ -21,7 +24,8 @@ export async function POST(request: Request) {
 
     const openai = new OpenAI({
       apiKey: profile.openrouter_api_key || "",
-      baseURL: "https://openrouter.ai/api/v1"
+      baseURL: "https://openrouter.ai/api/v1",
+      httpAgent: agent
     })
 
     const response = await openai.chat.completions.create({

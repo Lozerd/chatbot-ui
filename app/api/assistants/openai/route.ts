@@ -1,8 +1,12 @@
 import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ServerRuntime } from "next"
-import OpenAI from "openai"
+import { OpenAI } from "openai"
 
 export const runtime: ServerRuntime = "edge"
+
+import { SocksProxyAgent } from "socks-proxy-agent"
+const proxyUrl = process.env.OPENAI_API_PROXY || "" // Replace with your SOCKS5 proxy's address and port
+const agent = new SocksProxyAgent(proxyUrl)
 
 export async function GET() {
   try {
@@ -12,6 +16,7 @@ export async function GET() {
 
     const openai = new OpenAI({
       apiKey: profile.openai_api_key || "",
+      httpAgent: agent,
       organization: profile.openai_organization_id
     })
 

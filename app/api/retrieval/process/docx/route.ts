@@ -6,6 +6,9 @@ import { FileItemChunk } from "@/types"
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 import OpenAI from "openai"
+import { SocksProxyAgent } from "socks-proxy-agent"
+const proxyUrl = process.env.OPENAI_API_PROXY || "" // Replace with your SOCKS5 proxy's address and port
+const agent = new SocksProxyAgent(proxyUrl)
 
 export async function POST(req: Request) {
   const json = await req.json()
@@ -52,12 +55,14 @@ export async function POST(req: Request) {
         apiKey: profile.azure_openai_api_key || "",
         baseURL: `${profile.azure_openai_endpoint}/openai/deployments/${profile.azure_openai_embeddings_id}`,
         defaultQuery: { "api-version": "2023-12-01-preview" },
-        defaultHeaders: { "api-key": profile.azure_openai_api_key }
+        defaultHeaders: { "api-key": profile.azure_openai_api_key },
+        httpAgent: agent
       })
     } else {
       openai = new OpenAI({
         apiKey: profile.openai_api_key || "",
-        organization: profile.openai_organization_id
+        organization: profile.openai_organization_id,
+        httpAgent: agent
       })
     }
 

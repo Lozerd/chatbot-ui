@@ -6,6 +6,10 @@ import { ServerRuntime } from "next"
 import OpenAI from "openai"
 import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs"
 
+import { SocksProxyAgent } from "socks-proxy-agent"
+const proxyUrl = process.env.OPENAI_API_PROXY || "" // Replace with your SOCKS5 proxy's address and port
+const agent = new SocksProxyAgent(proxyUrl)
+
 export const runtime: ServerRuntime = "edge"
 
 export async function POST(request: Request) {
@@ -34,7 +38,8 @@ export async function POST(request: Request) {
 
     const custom = new OpenAI({
       apiKey: customModel.api_key || "",
-      baseURL: customModel.base_url
+      baseURL: customModel.base_url,
+      httpAgent: agent
     })
 
     const response = await custom.chat.completions.create({

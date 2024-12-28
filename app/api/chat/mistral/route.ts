@@ -3,6 +3,9 @@ import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
 import { OpenAIStream, StreamingTextResponse } from "ai"
 import OpenAI from "openai"
+import { SocksProxyAgent } from "socks-proxy-agent"
+const proxyUrl = process.env.OPENAI_API_PROXY || "" // Replace with your SOCKS5 proxy's address and port
+const agent = new SocksProxyAgent(proxyUrl)
 
 export const runtime = "edge"
 
@@ -21,7 +24,8 @@ export async function POST(request: Request) {
     // Mistral is compatible the OpenAI SDK
     const mistral = new OpenAI({
       apiKey: profile.mistral_api_key || "",
-      baseURL: "https://api.mistral.ai/v1"
+      baseURL: "https://api.mistral.ai/v1",
+      httpAgent: agent
     })
 
     const response = await mistral.chat.completions.create({

@@ -3,6 +3,9 @@ import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
 import { OpenAIStream, StreamingTextResponse } from "ai"
 import OpenAI from "openai"
+import { SocksProxyAgent } from "socks-proxy-agent"
+const proxyUrl = process.env.OPENAI_API_PROXY || "" // Replace with your SOCKS5 proxy's address and port
+const agent = new SocksProxyAgent(proxyUrl)
 
 export const runtime = "edge"
 export async function POST(request: Request) {
@@ -20,7 +23,8 @@ export async function POST(request: Request) {
     // Groq is compatible with the OpenAI SDK
     const groq = new OpenAI({
       apiKey: profile.groq_api_key || "",
-      baseURL: "https://api.groq.com/openai/v1"
+      baseURL: "https://api.groq.com/openai/v1",
+      httpAgent: agent
     })
 
     const response = await groq.chat.completions.create({
